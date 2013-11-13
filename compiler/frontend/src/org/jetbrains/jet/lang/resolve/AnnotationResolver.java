@@ -256,7 +256,7 @@ public class AnnotationResolver {
             @NotNull JetType expectedType,
             @NotNull BindingTrace trace
     ) {
-        return expression.accept(new ConstantExpressionEvaluator(trace, expectedType), null);
+        return ConstantExpressionEvaluator.evaluate(expression, trace, expectedType);
     }
 
     @NotNull
