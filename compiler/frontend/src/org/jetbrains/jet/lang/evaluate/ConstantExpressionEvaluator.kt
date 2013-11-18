@@ -33,6 +33,7 @@ import org.jetbrains.jet.lang.resolve.calls.tasks.ExplicitReceiverKind
 import org.jetbrains.jet.lang.types.TypeUtils
 import java.lang.Short as JShort
 import java.lang.Byte as JByte
+import org.jetbrains.jet.lang.resolve.calls.model.ResolvedValueArgument
 
 [suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")]
 public class ConstantExpressionEvaluator private (val trace: BindingTrace) : JetVisitor<CompileTimeConstant<*>, JetType>() {
@@ -123,12 +124,15 @@ public class ConstantExpressionEvaluator private (val trace: BindingTrace) : Jet
             val rightConstant = evaluate(rightExpression, booleanType)
             if (rightConstant == null) return null
 
-            val operationName = when(operationToken) {
-                JetTokens.ANDAND -> Name.identifier("&&")
-                JetTokens.OROR -> Name.identifier("||")
+            val leftValue = leftConstant.getValue()
+            val rightValue = rightConstant.getValue()
+
+            if (leftValue !is Boolean || rightValue !is Boolean) return null
+            val result = when(operationToken) {
+                JetTokens.ANDAND -> leftValue as Boolean && rightValue as Boolean
+                JetTokens.OROR -> leftValue as Boolean || rightValue as Boolean
                 else -> throw IllegalArgumentException("Unknown boolean operation token ${operationToken}")
             }
-            val result = evaluateBinaryExpression(leftConstant, rightConstant, operationName)
             return createCompileTimeConstant(result, expectedType)
         }
         else {
@@ -145,28 +149,29 @@ public class ConstantExpressionEvaluator private (val trace: BindingTrace) : Jet
         val resolvedCall = trace.getBindingContext().get(BindingContext.RESOLVED_CALL, callExpression)
         if (resolvedCall == null) return null
 
-        val resultingDescriptor = resolvedCall.getResultingDescriptor()
-        if (resultingDescriptor == null) return null
+        val resultingDescriptorName = resolvedCall.getResultingDescriptor()?.getName()?.asString()
+        if (resultingDescriptorName == null) return null
 
-        val receiverExpressionType = getReceiverExpressionType(resolvedCall)
-        if (receiverExpressionType == null) return null
+        val argumentForReceiver = createOperationArgumentForReceiver(resolvedCall, receiverExpression)
+        if (argumentForReceiver == null) return null
 
-        val receiverValue = evaluate(receiverExpression, receiverExpressionType)
-        if (receiverValue == null) return null
+        val argumentsEntrySet = resolvedCall.getValueArguments().entrySet()
+        if (argumentsEntrySet.isEmpty()) {
+            val function = unaryOperations[UnaryOperation(argumentForReceiver.ctcType, resultingDescriptorName)]
+            if (function == null) return null
+            return function(argumentForReceiver.value)
+        }
+        else if (argumentsEntrySet.size() == 1) {
+            val (parameter, argument) = argumentsEntrySet.first()
 
-        val arguments = resolvedCall.getValueArguments().entrySet().flatMap {
-            entry ->
-            val (parameter, argument) = entry
-            resolveArguments(argument.getArguments(), parameter.getType())
+            val argumentForParameter = createOperationArgumentForFristParameter(argument, parameter)
+            if (argumentForParameter == null) return null
+
+            val function = binaryOperations[BinaryOperation(argumentForReceiver.ctcType, argumentForParameter.ctcType, resultingDescriptorName)]
+            if (function == null) return null
+            return function(argumentForReceiver.value, argumentForParameter.value)
         }
 
-        val resultingDescriptorName = resultingDescriptor.getName()
-        if (arguments.isEmpty()) {
-            return evaluateUnaryExpression(receiverValue, resultingDescriptorName)
-        }
-        else if (arguments.size() == 1) {
-            return evaluateBinaryExpression(receiverValue, arguments.first(), resultingDescriptorName)
-        }
         return null
     }
 
@@ -277,6 +282,34 @@ public class ConstantExpressionEvaluator private (val trace: BindingTrace) : Jet
             return evaluator.evaluate(expression, expectedType)
         }
     }
+
+    private class OperationArgument(val value: Any?, val ctcType: CompileTimeType<*>)
+
+    private fun createOperationArgumentForReceiver(resolvedCall: ResolvedCall<*>, expression: JetExpression): OperationArgument? {
+        val receiverExpressionType = getReceiverExpressionType(resolvedCall)
+        if (receiverExpressionType == null) return null
+
+        val receiverCompileTimeType = getCompileTimeType(receiverExpressionType)
+        if (receiverCompileTimeType == null) return null
+
+        val receiverValue = evaluate(expression, receiverExpressionType)?.getValue()
+        if (receiverValue == null) return null
+
+        return OperationArgument(receiverValue, receiverCompileTimeType)
+    }
+
+    private fun createOperationArgumentForFristParameter(argument: ResolvedValueArgument, parameter: ValueParameterDescriptor): OperationArgument? {
+        val argumentCompileTimeType = getCompileTimeType(parameter.getType())
+        if (argumentCompileTimeType == null) return null
+
+        val argumentCompileTimeValue = resolveArguments(argument.getArguments(), parameter.getType())
+        if (argumentCompileTimeValue.size != 1) return null
+
+        val argumentValue = argumentCompileTimeValue.first().getValue()
+        if (argumentValue == null) return null
+
+        return OperationArgument(argumentValue, argumentCompileTimeType)
+    }
 }
 
 private fun createCompileTimeConstantForEquals(result: Any?, operationToken: IElementType): CompileTimeConstant<*>? {
@@ -370,3 +403,51 @@ private fun isEnumProperty(descriptor: PropertyDescriptor): Boolean {
     val classifier = descriptor.getType().getConstructor().getDeclarationDescriptor()
     return classifier != null && DescriptorUtils.isEnumClass(classifier) && DescriptorUtils.isEnumClassObject(descriptor.getContainingDeclaration())
 }
+
+private fun getCompileTimeType(c: JetType): CompileTimeType<out Any>? {
+    val builtIns = KotlinBuiltIns.getInstance()
+    return when (TypeUtils.makeNotNullable(c)) {
+        builtIns.getIntType() -> INT
+        builtIns.getByteType() -> BYTE
+        builtIns.getShortType() -> SHORT
+        builtIns.getLongType() -> LONG
+        builtIns.getDoubleType() -> DOUBLE
+        builtIns.getFloatType() -> FLOAT
+        builtIns.getCharType() -> CHAR
+        builtIns.getBooleanType() -> BOOLEAN
+        builtIns.getStringType() -> STRING
+        builtIns.getAnyType() -> ANY
+        else -> null
+    }
+}
+
+private class CompileTimeType<T>
+
+private val BYTE = CompileTimeType<Byte>()
+private val SHORT = CompileTimeType<Short>()
+private val INT = CompileTimeType<Int>()
+private val LONG = CompileTimeType<Long>()
+private val DOUBLE = CompileTimeType<Double>()
+private val FLOAT = CompileTimeType<Float>()
+private val CHAR = CompileTimeType<Char>()
+private val BOOLEAN = CompileTimeType<Boolean>()
+private val STRING = CompileTimeType<String>()
+private val ANY = CompileTimeType<Any>()
+
+[suppress("UNCHECKED_CAST")]
+private fun <A, B> bOp(
+        a: CompileTimeType<A>,
+        b: CompileTimeType<B>,
+        functionName: String,
+        f: (A, B) -> Any
+) = BinaryOperation(a, b, functionName) to f as Function2<Any?, Any?, Any>
+
+[suppress("UNCHECKED_CAST")]
+private fun <A> uOp(
+        a: CompileTimeType<A>,
+        functionName: String,
+        f: (A) -> Any
+) = UnaryOperation(a, functionName) to f  as Function1<Any?, Any>
+
+private data class BinaryOperation<A, B>(val f: CompileTimeType<out A>, val s: CompileTimeType<out B>, val functionName: String)
+private data class UnaryOperation<A>(val f: CompileTimeType<out A>, val functionName: String)
