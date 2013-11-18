@@ -3752,6 +3752,11 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
                 doTest("compiler/testData/diagnostics/tests/inline/functionLiterals.kt");
             }
             
+            @TestMetadata("inlineAnnotation.kt")
+            public void testInlineAnnotation() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/inlineAnnotation.kt");
+            }
+            
             @TestMetadata("invoke.kt")
             public void testInvoke() throws Exception {
                 doTest("compiler/testData/diagnostics/tests/inline/invoke.kt");

@@ -16,20 +16,13 @@
 
 package org.jetbrains.jet.lang.resolve.extension;
 
-import com.intellij.psi.PsiReference;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.jet.lang.descriptors.CallableDescriptor;
-import org.jetbrains.jet.lang.descriptors.SimpleFunctionDescriptor;
-import org.jetbrains.jet.lang.descriptors.ValueParameterDescriptor;
+import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.diagnostics.Errors;
 import org.jetbrains.jet.lang.psi.*;
-import org.jetbrains.jet.lang.resolve.BindingContext;
-import org.jetbrains.jet.lang.resolve.BindingContextUtils;
 import org.jetbrains.jet.lang.resolve.BindingTrace;
 import org.jetbrains.jet.lang.resolve.FunctionAnalyzerExtension;
-import org.jetbrains.jet.lang.resolve.calls.model.ResolvedCall;
 
-import java.util.Iterator;
 import java.util.List;
 
 public class InlineAnalyzerExtension implements FunctionAnalyzerExtension.AnalyzerExtension {
@@ -44,6 +37,7 @@ public class InlineAnalyzerExtension implements FunctionAnalyzerExtension.Analyz
     ) {
 
         checkDefaults(descriptor, function, trace);
+        checkModality(descriptor, function, trace);
 
         JetVisitorVoid visitor = new JetVisitorVoid() {
 
@@ -80,5 +74,22 @@ public class InlineAnalyzerExtension implements FunctionAnalyzerExtension.Analyz
                 trace.report(Errors.NOT_YET_SUPPORTED_IN_INLINE.on(parameter, parameter, functionDescriptor));
             }
         }
+    }
+
+    private void checkModality(
+            @NotNull SimpleFunctionDescriptor functionDescriptor,
+            @NotNull JetFunction function,
+            @NotNull BindingTrace trace
+    ) {
+        if (functionDescriptor.getVisibility() == Visibilities.PRIVATE || functionDescriptor.getModality() == Modality.FINAL) {
+            return;
+        }
+
+        DeclarationDescriptor declaration = functionDescriptor.getContainingDeclaration();
+        if (declaration instanceof NamespaceDescriptor) {
+            return;
+        }
+
+        trace.report(Errors.WRONG_MEMBER_MODALITY_FOR_INLINE.on(function));
     }
 }
