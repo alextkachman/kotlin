@@ -19,6 +19,7 @@ package org.jetbrains.jet.utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.List;
 
 public interface KotlinPaths {
     @NotNull
@@ -40,7 +41,7 @@ public interface KotlinPaths {
     File getAndroidSdkAnnotationsPath();
 
     @NotNull
-    File getJsLibJsPath();
+    List<File> getJsLibPaths();
 
     @NotNull
     File getJsLibJarPath();

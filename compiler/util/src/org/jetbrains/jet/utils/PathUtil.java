@@ -30,7 +30,8 @@ public class PathUtil {
     public static final String JPS_KOTLIN_HOME_PROPERTY = "jps.kotlin.home";
 
     public static final String JS_LIB_JAR_NAME = "kotlin-jslib.jar";
-    public static final String JS_LIB_JS_NAME = "kotlin.js";
+    public static final String JS_CORE_LIB_JS_NAME = "kotlin_core.js";
+    public static final String JS_LIB_JS_NAME = "kotlin_lib.js";
     public static final String JDK_ANNOTATIONS_JAR = "kotlin-jdk-annotations.jar";
     public static final String ANDROID_SDK_ANNOTATIONS_JAR = "kotlin-android-sdk-annotations.jar";
     public static final String KOTLIN_JAVA_RUNTIME_JAR = "kotlin-runtime.jar";

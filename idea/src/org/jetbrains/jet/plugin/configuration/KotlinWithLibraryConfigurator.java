@@ -10,11 +10,15 @@ import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar;
 import com.intellij.openapi.roots.ui.configuration.projectRoot.LibrariesContainer;
 import com.intellij.openapi.roots.ui.configuration.projectRoot.LibrariesContainerFactory;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Ref;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.Function;
 import com.intellij.util.Processor;
+import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.plugin.JetPluginUtil;
@@ -23,6 +27,8 @@ import org.jetbrains.jet.utils.KotlinPaths;
 import org.jetbrains.jet.utils.PathUtil;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 import static org.jetbrains.jet.plugin.configuration.ConfigureKotlinInProjectUtils.showInfoNotification;
 
@@ -187,6 +193,27 @@ public abstract class KotlinWithLibraryConfigurator implements KotlinProjectConf
             showInfoNotification(file.getName() + " was copied to " + toDir);
         }
         return copy;
+    }
+
+    public void copyFilesToDir(@NotNull List<File> files, @NotNull final String toDir) {
+        Map<File,String> filesWithDestinations = ContainerUtil.map2Map(files, new Function<File, Pair<File, String>>() {
+            @Override
+            public Pair<File, String> fun(File file) {
+                return Pair.create(file, toDir);
+            }
+        });
+
+        Map<File, File> copiedFiles = FileUIUtils.copyWithOverwriteDialog(getMessageForOverrideDialog(), filesWithDestinations);
+
+        if (copiedFiles != null) {
+            String copiedFileNames = StringUtil.join(copiedFiles.values(), new Function<File, String>() {
+                @Override
+                public String fun(File file) {
+                    return file.getName();
+                }
+            }, ", ");
+            showInfoNotification(copiedFileNames + " was copied to " + toDir);
+        }
     }
 
     @Nullable

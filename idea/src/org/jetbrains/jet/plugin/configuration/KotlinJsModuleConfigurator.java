@@ -124,8 +124,12 @@ public class KotlinJsModuleConfigurator extends KotlinWithLibraryConfigurator {
     }
 
     @NotNull
-    public File getJsFile() {
-        return assertFileExists(getKotlinPaths().getJsLibJsPath());
+    public List<File> getJsFiles() {
+        List<File> jsLibPaths = getKotlinPaths().getJsLibPaths();
+        for (File file : jsLibPaths) {
+            assertFileExists(file);
+        }
+        return jsLibPaths;
     }
 
     private static boolean needToChooseJsFilePath(@NotNull Project project) {
@@ -146,7 +150,7 @@ public class KotlinJsModuleConfigurator extends KotlinWithLibraryConfigurator {
         if (isJsFilePresent) return;
 
         if (pathToJsFromDialog != null) {
-            copyFileToDir(getJsFile(), pathToJsFromDialog);
+            copyFilesToDir(getJsFiles(), pathToJsFromDialog);
         }
     }
 

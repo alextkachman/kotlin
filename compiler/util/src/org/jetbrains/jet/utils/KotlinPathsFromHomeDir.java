@@ -19,6 +19,8 @@ package org.jetbrains.jet.utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 public class KotlinPathsFromHomeDir implements KotlinPaths {
     // kotlinc directory
@@ -66,8 +68,10 @@ public class KotlinPathsFromHomeDir implements KotlinPaths {
 
     @Override
     @NotNull
-    public File getJsLibJsPath() {
-        return getLibraryFile(PathUtil.JS_LIB_JS_NAME);
+    public List<File> getJsLibPaths() {
+        return Arrays.asList(
+                getLibraryFile(PathUtil.JS_CORE_LIB_JS_NAME),
+                getLibraryFile(PathUtil.JS_LIB_JS_NAME));
     }
 
     @Override

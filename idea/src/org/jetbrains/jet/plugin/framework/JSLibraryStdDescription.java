@@ -77,7 +77,7 @@ public class JSLibraryStdDescription extends CustomLibraryDescription {
 
         String copyJsFileIntoPath = dialog.getCopyJsIntoPath();
         if (!jsFilePresent && copyJsFileIntoPath != null) {
-            configurator.copyFileToDir(configurator.getJsFile(), copyJsFileIntoPath);
+            configurator.copyFilesToDir(configurator.getJsFiles(), copyJsFileIntoPath);
         }
 
         if (jarFilePresent) {
