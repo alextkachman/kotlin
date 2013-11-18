@@ -203,14 +203,42 @@
     </target>
 
     <target name="jslib">
-        <jar jarfile="${kotlin-home}/lib/kotlin-jslib.jar">
+        <path id="js.lib">
             <fileset dir="${basedir}/js/js.libraries/src">
-                <include name="core/**"/>
-                <include name="jquery/**"/>
-                <include name="dom/**"/>
-                <include name="html5/**"/>
-                <include name="stdlib/TuplesCode.kt"/>
+                <include name="**/*.kt" />
             </fileset>
+
+            <fileset dir="${basedir}/libraries/stdlib/src">
+                <include name="**/*.kt" />
+                <!-- JVM specific -->
+                <exclude name="**/*JVM.kt" />
+                <exclude name="kotlin/beans/**" />
+                <exclude name="kotlin/browser/**" />
+                <exclude name="kotlin/concurrent/**" />
+                <exclude name="kotlin/io/**" />
+                <exclude name="kotlin/math/**" />
+                <exclude name="kotlin/template/**" />
+                <exclude name="kotlin/util/**" />
+                <exclude name="kotlin/Annotations.kt" />
+                <exclude name="kotlin/Char.kt" />
+                <exclude name="kotlin/Tuples.kt" />
+
+                <!-- temporary disabled -->
+                <!-- TODO: some declarations references to Java implementation -->
+                <exclude name="kotlin/modules/**" />
+                <!-- TODO: compilation crashes-->
+                <exclude name="kotlin/properties/**" />
+                <!-- TODO: Unresolved references: Array.copyOf -->
+                <exclude name="kotlin/ImmutableArrayList.kt" />
+                <!-- TODO: Unresolved references: Float and Double -->
+                <exclude name="kotlin/Ranges.kt" />
+            </fileset>
+        </path>
+
+        <kotlin2js srcRef="js.lib" output="${basedir}/js/js.translator/testFiles/kotlin_lib_compiled.js" main="noCall" />
+
+        <jar jarfile="${kotlin-home}/lib/kotlin-jslib.jar">
+            <path refid="js.lib" />
             <zipfileset file="${kotlin-home}/build.txt" prefix="META-INF"/>
 
             <manifest>
@@ -231,14 +259,36 @@
             prettyprint="true"
             languagein="ECMASCRIPT5_STRICT"
             warning="verbose"
-            debug="false"
-            output="${kotlin-home}/lib/kotlin.js" >
+            output="${kotlin-home}/lib/kotlin_core.js" >
 
           <sources dir="${basedir}/js/js.translator/testFiles">
-            <file name="kotlin_lib_ecma5.js"/>
+              <file name="kotlin_lib_ecma5.js"/>
+          </sources>
+
+        </closure-compiler>
+
+        <closure-compiler
+            compilationLevel="simple"
+            prettyprint="true"
+            languagein="ECMASCRIPT5_STRICT"
+            warning="verbose"
+            output="${kotlin-home}/lib/kotlin_lib.js" >
+
+          <sources dir="${basedir}/js/js.translator/testFiles">
+            <file name="kotlin_lib_compiled.js"/>
             <file name="kotlin_lib.js"/>
             <file name="maps.js"/>
           </sources>
+
+          <externs dir="${basedir}/js/js.translator/testFiles">
+            <file name="kotlin_lib_ecma5.js"/>
+          </externs>
+
+          <!-- For reuse kotlin_lib_ecma5.js as externs without warnings from there -->
+          <warning group="externsValidation" level="OFF" />
+
+          <!-- TODO FIX: temporary disabled, back enable after KT-4207 and KT-4208 will be fixed -->
+          <warning group="undefinedVars" level="WARNING" />
 
         </closure-compiler>
     </target>
