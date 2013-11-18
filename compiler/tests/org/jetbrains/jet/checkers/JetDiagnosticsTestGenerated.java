@@ -3767,6 +3767,11 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
                 doTest("compiler/testData/diagnostics/tests/inline/unsupportedConstruction.kt");
             }
             
+            @TestMetadata("vararg.kt")
+            public void testVararg() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/vararg.kt");
+            }
+            
             @TestMetadata("wrongUsage.kt")
             public void testWrongUsage() throws Exception {
                 doTest("compiler/testData/diagnostics/tests/inline/wrongUsage.kt");

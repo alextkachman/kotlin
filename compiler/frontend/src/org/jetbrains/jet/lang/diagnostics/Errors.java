@@ -564,7 +564,7 @@ public interface Errors {
     //Inline and inlinable parameters
     DiagnosticFactory2<JetElement, JetNamedDeclaration, DeclarationDescriptor> NOT_YET_SUPPORTED_IN_INLINE = DiagnosticFactory2.create(ERROR);
     DiagnosticFactory1<JetElement, DeclarationDescriptor> NOTHING_TO_INLINE = DiagnosticFactory1.create(WARNING);
-    DiagnosticFactory2<JetElement, JetExpression, DeclarationDescriptor> USAGE_IS_NOT_INLINABLE = DiagnosticFactory2.create(WARNING);
+    DiagnosticFactory2<JetElement, JetExpression, DeclarationDescriptor> USAGE_IS_NOT_INLINABLE = DiagnosticFactory2.create(ERROR);
     DiagnosticFactory0<JetElement> WRONG_MEMBER_MODALITY_FOR_INLINE = DiagnosticFactory0.create(ERROR);
 
     // Error sets

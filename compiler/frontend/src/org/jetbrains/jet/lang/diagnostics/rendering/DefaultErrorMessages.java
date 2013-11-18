@@ -474,10 +474,10 @@ public class DefaultErrorMessages {
 
         //Inline
         MAP.put(INVISIBLE_MEMBER_FROM_INLINE, "Cannot access effectively nonpublic ''{0}'' member from effectively public inline function ''{1}''", NAME, NAME);
-        MAP.put(NOT_YET_SUPPORTED_IN_INLINE, "{0} construction not yet supported in inline function {1}", ELEMENT_TEXT, NAME);
+        MAP.put(NOT_YET_SUPPORTED_IN_INLINE, "''{0}'' construction not yet supported in inline function {1}", ELEMENT_TEXT, NAME);
         MAP.put(WRONG_MEMBER_MODALITY_FOR_INLINE, "Inline annotation could be present only on nonvirtual members");
-        MAP.put(NOTHING_TO_INLINE, "There is no function parameters to inline into {0}", NAME);
-        MAP.put(USAGE_IS_NOT_INLINABLE, "Illegal usage of inline parameter {0} in {1}. You could annotate it with 'noinline' annotation to skip from inlining", ELEMENT_TEXT, NAME);
+        MAP.put(NOTHING_TO_INLINE, "There is no function parameters to inline into ''{0}''", NAME);
+        MAP.put(USAGE_IS_NOT_INLINABLE, "Illegal usage of inline parameter ''{0}'' in inline function ''{1}''. You could annotate it with 'noinline' annotation to skip from inlining.", ELEMENT_TEXT, NAME);
 
         MAP.setImmutable();
 
