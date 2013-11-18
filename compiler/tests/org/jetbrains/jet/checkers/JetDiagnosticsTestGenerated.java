@@ -33,7 +33,7 @@ import org.jetbrains.jet.checkers.AbstractDiagnosticsTestWithEagerResolve;
 @InnerTestClasses({JetDiagnosticsTestGenerated.Tests.class, JetDiagnosticsTestGenerated.Script.class})
 public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEagerResolve {
     @TestMetadata("compiler/testData/diagnostics/tests")
-    @InnerTestClasses({Tests.Annotations.class, Tests.BackingField.class, Tests.CallableReference.class, Tests.Cast.class, Tests.CheckArguments.class, Tests.ClassObjects.class, Tests.ControlFlowAnalysis.class, Tests.ControlStructures.class, Tests.DataClasses.class, Tests.DataFlow.class, Tests.DataFlowInfoTraversal.class, Tests.DeclarationChecks.class, Tests.DelegatedProperty.class, Tests.Deparenthesize.class, Tests.Enum.class, Tests.Extensions.class, Tests.FunctionLiterals.class, Tests.Generics.class, Tests.IncompleteCode.class, Tests.Inference.class, Tests.Infos.class, Tests.Inner.class, Tests.J_k.class, Tests.Jdk_annotations.class, Tests.Library.class, Tests.NullabilityAndAutoCasts.class, Tests.NullableTypes.class, Tests.Numbers.class, Tests.Objects.class, Tests.OperatorsOverloading.class, Tests.Overload.class, Tests.Override.class, Tests.Recovery.class, Tests.Redeclarations.class, Tests.Regressions.class, Tests.Resolve.class, Tests.Scopes.class, Tests.SenselessComparison.class, Tests.Shadowing.class, Tests.SmartCasts.class, Tests.Substitutions.class, Tests.Subtyping.class, Tests.Suppress.class, Tests.ThisAndSuper.class, Tests.Varargs.class, Tests.When.class})
+    @InnerTestClasses({Tests.Annotations.class, Tests.BackingField.class, Tests.CallableReference.class, Tests.Cast.class, Tests.CheckArguments.class, Tests.ClassObjects.class, Tests.ControlFlowAnalysis.class, Tests.ControlStructures.class, Tests.DataClasses.class, Tests.DataFlow.class, Tests.DataFlowInfoTraversal.class, Tests.DeclarationChecks.class, Tests.DelegatedProperty.class, Tests.Deparenthesize.class, Tests.Enum.class, Tests.Extensions.class, Tests.FunctionLiterals.class, Tests.Generics.class, Tests.IncompleteCode.class, Tests.Inference.class, Tests.Infos.class, Tests.Inline.class, Tests.Inner.class, Tests.J_k.class, Tests.Jdk_annotations.class, Tests.Library.class, Tests.NullabilityAndAutoCasts.class, Tests.NullableTypes.class, Tests.Numbers.class, Tests.Objects.class, Tests.OperatorsOverloading.class, Tests.Overload.class, Tests.Override.class, Tests.Recovery.class, Tests.Redeclarations.class, Tests.Regressions.class, Tests.Resolve.class, Tests.Scopes.class, Tests.SenselessComparison.class, Tests.Shadowing.class, Tests.SmartCasts.class, Tests.Substitutions.class, Tests.Subtyping.class, Tests.Suppress.class, Tests.ThisAndSuper.class, Tests.Varargs.class, Tests.When.class})
     public static class Tests extends AbstractDiagnosticsTestWithEagerResolve {
         @TestMetadata("Abstract.kt")
         public void testAbstract() throws Exception {
@@ -3730,6 +3730,49 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
             
         }
         
+        @TestMetadata("compiler/testData/diagnostics/tests/inline")
+        public static class Inline extends AbstractDiagnosticsTestWithEagerResolve {
+            public void testAllFilesPresentInInline() throws Exception {
+                JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), "org.jetbrains.jet.generators.tests.GenerateTests", new File("compiler/testData/diagnostics/tests/inline"), Pattern.compile("^(.+)\\.kt$"), true);
+            }
+            
+            @TestMetadata("capture.kt")
+            public void testCapture() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/capture.kt");
+            }
+            
+            @TestMetadata("extensionOnFunction.kt")
+            public void testExtensionOnFunction() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/extensionOnFunction.kt");
+            }
+            
+            @TestMetadata("functionLiterals.kt")
+            public void testFunctionLiterals() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/functionLiterals.kt");
+            }
+            
+            @TestMetadata("invoke.kt")
+            public void testInvoke() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/invoke.kt");
+            }
+            
+            @TestMetadata("propagation.kt")
+            public void testPropagation() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/propagation.kt");
+            }
+            
+            @TestMetadata("unsupportedConstruction.kt")
+            public void testUnsupportedConstruction() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/unsupportedConstruction.kt");
+            }
+            
+            @TestMetadata("wrongUsage.kt")
+            public void testWrongUsage() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/wrongUsage.kt");
+            }
+            
+        }
+        
         @TestMetadata("compiler/testData/diagnostics/tests/inner")
         @InnerTestClasses({Inner.QualifiedExpression.class})
         public static class Inner extends AbstractDiagnosticsTestWithEagerResolve {
@@ -6210,6 +6253,7 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
             suite.addTest(IncompleteCode.innerSuite());
             suite.addTest(Inference.innerSuite());
             suite.addTestSuite(Infos.class);
+            suite.addTestSuite(Inline.class);
             suite.addTest(Inner.innerSuite());
             suite.addTestSuite(J_k.class);
             suite.addTest(Jdk_annotations.innerSuite());

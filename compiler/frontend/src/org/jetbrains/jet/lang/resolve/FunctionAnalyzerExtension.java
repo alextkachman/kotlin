@@ -17,19 +17,22 @@
 package org.jetbrains.jet.lang.resolve;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.jet.lang.descriptors.FunctionDescriptor;
 import org.jetbrains.jet.lang.descriptors.SimpleFunctionDescriptor;
 import org.jetbrains.jet.lang.psi.JetNamedFunction;
+import org.jetbrains.jet.lang.resolve.extension.InlineAnalyzerExtension;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class FunctionAnalyzerExtension {
 
+    private final static InlineAnalyzerExtension INLINE_EXTENSION = new InlineAnalyzerExtension();
+
     public interface AnalyzerExtension {
-        void process(@NotNull FunctionDescriptor descriptor, @NotNull JetNamedFunction function, @NotNull BindingTrace trace);
+        void process(@NotNull SimpleFunctionDescriptor descriptor, @NotNull JetNamedFunction function, @NotNull BindingTrace trace);
     }
 
     @NotNull
@@ -52,8 +55,12 @@ public class FunctionAnalyzerExtension {
     }
 
     @NotNull
-    private List<AnalyzerExtension> getExtensions(@NotNull FunctionDescriptor functionDescriptor) {
-        return Collections.emptyList();
+    private List<AnalyzerExtension> getExtensions(@NotNull SimpleFunctionDescriptor functionDescriptor) {
+        List<AnalyzerExtension> list = new ArrayList<AnalyzerExtension>();
+        if (functionDescriptor.isInline()) {
+            list.add(INLINE_EXTENSION);
+        }
+        return list;
     }
 
 }

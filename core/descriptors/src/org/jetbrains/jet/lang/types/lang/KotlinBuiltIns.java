@@ -381,6 +381,10 @@ public class KotlinBuiltIns {
         return getBuiltInClassByName("data");
     }
 
+    public ClassDescriptor getNoinlineClassAnnotation() {
+        return getBuiltInClassByName("noinline");
+    }
+
     @NotNull
     public ClassDescriptor getInlineClassAnnotation() {
         return getBuiltInClassByName("inline");
@@ -948,6 +952,10 @@ public class KotlinBuiltIns {
 
     public InlineStrategy getInlineType(@NotNull FunctionDescriptor functionDescriptor) {
         return getInlineType(functionDescriptor.getOriginal().getAnnotations());
+    }
+
+    public boolean hasNoinlineAnnotation(@NotNull ValueParameterDescriptor valueParameterDescriptor) {
+        return containsAnnotation(valueParameterDescriptor, getNoinlineClassAnnotation());
     }
 
     public InlineStrategy getInlineType(@Nullable List<AnnotationDescriptor> annotations) {

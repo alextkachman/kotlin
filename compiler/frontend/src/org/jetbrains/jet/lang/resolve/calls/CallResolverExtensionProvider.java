@@ -19,6 +19,7 @@ package org.jetbrains.jet.lang.resolve.calls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.descriptors.DeclarationDescriptor;
+import org.jetbrains.jet.lang.descriptors.SimpleFunctionDescriptor;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -71,6 +72,12 @@ public class CallResolverExtensionProvider {
     // with default one at the end
     private void appendExtensionsFor(DeclarationDescriptor declarationDescriptor, List<CallResolverExtension> extensions) {
         // add your extensions here
+        if (declarationDescriptor instanceof SimpleFunctionDescriptor) {
+            SimpleFunctionDescriptor descriptor = (SimpleFunctionDescriptor) declarationDescriptor;
+            if (descriptor.isInline()) {
+                extensions.add(new InlineCallResolverExtension(descriptor));
+            }
+        }
         extensions.add(DEFAULT);
     }
 }
