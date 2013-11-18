@@ -33,6 +33,7 @@ import org.jetbrains.k2js.config.Config;
 import org.jetbrains.k2js.config.EcmaVersion;
 import org.jetbrains.k2js.facade.MainCallParameters;
 import org.jetbrains.k2js.facade.exceptions.TranslationException;
+import org.jetbrains.k2js.test.config.TestConfig;
 import org.jetbrains.k2js.test.config.TestConfigFactory;
 import org.jetbrains.k2js.utils.JetFileUtils;
 
@@ -85,7 +86,7 @@ public final class TranslationUtils {
     }
 
     private static boolean isFileWithCode(@NotNull JetFile file) {
-        for (String filename : Config.LIB_FILES_WITH_CODE) {
+        for (String filename : TestConfig.LIB_FILES_WITH_CODE) {
             if (file.getName().contains(filename)) {
                 return true;
             }
@@ -127,7 +128,7 @@ public final class TranslationUtils {
 
     @NotNull
     private static List<JetFile> initLibFiles(@NotNull Project project) {
-        return createJetFileList(project, Config.LIB_FILE_NAMES, Config.LIBRARIES_LOCATION);
+        return createJetFileList(project, TestConfig.LIB_FILE_NAMES, TestConfig.LIBRARIES_LOCATION);
     }
 
     @NotNull
