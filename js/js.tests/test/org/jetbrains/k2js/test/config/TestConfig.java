@@ -19,10 +19,13 @@ package org.jetbrains.k2js.test.config;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.psi.JetFile;
 import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.k2js.config.Config;
 import org.jetbrains.k2js.config.EcmaVersion;
+import org.jetbrains.k2js.translate.test.JSTester;
+import org.jetbrains.k2js.translate.test.QUnitTester;
 
 import java.util.Arrays;
 import java.util.List;
@@ -154,5 +157,11 @@ public class TestConfig extends Config {
     @NotNull
     public List<JetFile> generateLibFiles() {
         return jsLibFiles;
+    }
+
+    @Nullable
+    @Override
+    public JSTester getTester() {
+        return new QUnitTester();
     }
 }
