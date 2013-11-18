@@ -12,3 +12,7 @@ inline fun unsupported() {
 
     <!NOT_YET_SUPPORTED_IN_INLINE!>fun local() {}<!>
 }
+
+inline fun unsupportedDefault(<!NOT_YET_SUPPORTED_IN_INLINE!>s : Int = 10<!>) {
+
+}

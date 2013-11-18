@@ -24,11 +24,13 @@ import org.jetbrains.jet.lang.descriptors.ValueParameterDescriptor;
 import org.jetbrains.jet.lang.diagnostics.Errors;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.BindingContext;
+import org.jetbrains.jet.lang.resolve.BindingContextUtils;
 import org.jetbrains.jet.lang.resolve.BindingTrace;
 import org.jetbrains.jet.lang.resolve.FunctionAnalyzerExtension;
 import org.jetbrains.jet.lang.resolve.calls.model.ResolvedCall;
 
 import java.util.Iterator;
+import java.util.List;
 
 public class InlineAnalyzerExtension implements FunctionAnalyzerExtension.AnalyzerExtension {
 
@@ -41,7 +43,7 @@ public class InlineAnalyzerExtension implements FunctionAnalyzerExtension.Analyz
             @NotNull final SimpleFunctionDescriptor descriptor, @NotNull JetNamedFunction function, @NotNull final BindingTrace trace
     ) {
 
-        Iterator<ValueParameterDescriptor> iterator = descriptor.getValueParameters().iterator();
+        checkDefaults(descriptor, function, trace);
 
         JetVisitorVoid visitor = new JetVisitorVoid() {
 
@@ -68,5 +70,15 @@ public class InlineAnalyzerExtension implements FunctionAnalyzerExtension.Analyz
         };
 
         function.acceptChildren(visitor);
+    }
+
+    private void checkDefaults(@NotNull SimpleFunctionDescriptor functionDescriptor, @NotNull JetFunction function, @NotNull BindingTrace trace) {
+        List<JetParameter> parameters = function.getValueParameters();
+        for (int i = 0; i < parameters.size(); i++) {
+            JetParameter parameter =  parameters.get(i);
+            if (parameter.getDefaultValue() != null) {
+                trace.report(Errors.NOT_YET_SUPPORTED_IN_INLINE.on(parameter, parameter, functionDescriptor));
+            }
+        }
     }
 }
