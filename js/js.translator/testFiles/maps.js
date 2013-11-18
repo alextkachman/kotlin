@@ -16,6 +16,7 @@
 
 "use strict";
 (function () {
+    /** @const */
     var FUNCTION = "function";
     var arrayRemoveAt = (typeof Array.prototype.splice == FUNCTION) ?
                         function (arr, idx) {
@@ -83,6 +84,14 @@
 
     var checkKey = createKeyValCheck("key"), checkValue = createKeyValCheck("value");
 
+    /**
+     * @constructor
+     * @template  Key, Value
+     * @param {string} hash
+     * @param {Key} firstKey
+     * @param {Value} firstValue
+     * @param {(function(Key, Key): boolean)|null} equalityFunction
+     */
     function Bucket(hash, firstKey, firstValue, equalityFunction) {
         this[0] = hash;
         this.entries = [];
@@ -197,6 +206,13 @@
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
+    /**
+     * @class
+     * @constructor
+     * @template Key, Value
+     * @param {(function(Key): string)=} hashingFunctionParam
+     * @param {(function(Key, Key): boolean)=} equalityFunctionParam
+     */
     var Hashtable = function (hashingFunctionParam, equalityFunctionParam) {
         var that = this;
         var buckets = [];
@@ -346,7 +362,10 @@
             }
         };
 
-
+        /**
+         * @param {HashTable.<Key, Value>} hashtable
+         * @param {(function(Key, Value, Value): Value)=} conflictCallback
+         */
         this.putAll = function (hashtable, conflictCallback) {
             var entries = hashtable._entries();
             var entry, key, value, thisValue, i = entries.length;
@@ -380,7 +399,6 @@
             return res;
         };
     };
-
 
     Kotlin.HashTable = Hashtable;
 })();
@@ -508,7 +526,9 @@ Kotlin.PrimitiveHashSet = Kotlin.createClassNow(Kotlin.AbstractCollection,
     function () {
         this.$size = 0;
         this.map = {};
-    }, {
+    },
+    /** @lends {Kotlin.PrimitiveHashSet.prototype} */
+    {
         contains: function (key) {
             return this.map[key] === true;
         },
@@ -543,6 +563,13 @@ Kotlin.PrimitiveHashSet = Kotlin.createClassNow(Kotlin.AbstractCollection,
 });
 
 (function () {
+    /**
+     * @class
+     * @constructor
+     * @template Key, Value
+     * @param {(function(Key): string)=} hashingFunction
+     * @param {(function(Key, Key): boolean)=} equalityFunction
+     */
     function HashSet(hashingFunction, equalityFunction) {
         var hashTable = new Kotlin.HashTable(hashingFunction, equalityFunction);
 
