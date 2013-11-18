@@ -3731,6 +3731,7 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
         }
         
         @TestMetadata("compiler/testData/diagnostics/tests/inline")
+        @InnerTestClasses({Inline.NonPublicMember.class})
         public static class Inline extends AbstractDiagnosticsTestWithEagerResolve {
             public void testAllFilesPresentInInline() throws Exception {
                 JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), "org.jetbrains.jet.generators.tests.GenerateTests", new File("compiler/testData/diagnostics/tests/inline"), Pattern.compile("^(.+)\\.kt$"), true);
@@ -3771,6 +3772,40 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
                 doTest("compiler/testData/diagnostics/tests/inline/wrongUsage.kt");
             }
             
+            @TestMetadata("compiler/testData/diagnostics/tests/inline/nonPublicMember")
+            public static class NonPublicMember extends AbstractDiagnosticsTestWithEagerResolve {
+                public void testAllFilesPresentInNonPublicMember() throws Exception {
+                    JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), "org.jetbrains.jet.generators.tests.GenerateTests", new File("compiler/testData/diagnostics/tests/inline/nonPublicMember"), Pattern.compile("^(.+)\\.kt$"), true);
+                }
+                
+                @TestMetadata("inNonPublicClass.kt")
+                public void testInNonPublicClass() throws Exception {
+                    doTest("compiler/testData/diagnostics/tests/inline/nonPublicMember/inNonPublicClass.kt");
+                }
+                
+                @TestMetadata("inNonPublicInnerClass.kt")
+                public void testInNonPublicInnerClass() throws Exception {
+                    doTest("compiler/testData/diagnostics/tests/inline/nonPublicMember/inNonPublicInnerClass.kt");
+                }
+                
+                @TestMetadata("inPackage.kt")
+                public void testInPackage() throws Exception {
+                    doTest("compiler/testData/diagnostics/tests/inline/nonPublicMember/inPackage.kt");
+                }
+                
+                @TestMetadata("inPublicClass.kt")
+                public void testInPublicClass() throws Exception {
+                    doTest("compiler/testData/diagnostics/tests/inline/nonPublicMember/inPublicClass.kt");
+                }
+                
+            }
+            
+            public static Test innerSuite() {
+                TestSuite suite = new TestSuite("Inline");
+                suite.addTestSuite(Inline.class);
+                suite.addTestSuite(NonPublicMember.class);
+                return suite;
+            }
         }
         
         @TestMetadata("compiler/testData/diagnostics/tests/inner")
@@ -6253,7 +6288,7 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
             suite.addTest(IncompleteCode.innerSuite());
             suite.addTest(Inference.innerSuite());
             suite.addTestSuite(Infos.class);
-            suite.addTestSuite(Inline.class);
+            suite.addTest(Inline.innerSuite());
             suite.addTest(Inner.innerSuite());
             suite.addTestSuite(J_k.class);
             suite.addTest(Jdk_annotations.innerSuite());
