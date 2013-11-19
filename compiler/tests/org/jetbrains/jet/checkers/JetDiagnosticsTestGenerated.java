@@ -3232,6 +3232,11 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
                 doTest("compiler/testData/diagnostics/tests/inference/possibleCycleOnConstraints.kt");
             }
             
+            @TestMetadata("tryNumberLowerBoundsBeforeUpperBounds.kt")
+            public void testTryNumberLowerBoundsBeforeUpperBounds() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inference/tryNumberLowerBoundsBeforeUpperBounds.kt");
+            }
+            
             @TestMetadata("typeConstructorMismatch.kt")
             public void testTypeConstructorMismatch() throws Exception {
                 doTest("compiler/testData/diagnostics/tests/inference/typeConstructorMismatch.kt");
