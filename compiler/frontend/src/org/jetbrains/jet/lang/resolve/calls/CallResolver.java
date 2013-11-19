@@ -446,8 +446,6 @@ public class CallResolver {
                 if (results.isSuccess()) {
                     debugInfo.set(ResolutionDebugInfo.RESULT, results.getResultingCall());
                 }
-
-                resolveFunctionArguments(context, results);
                 return results;
             }
             if (results.getResultCode() == INCOMPLETE_TYPE_INFERENCE) {
@@ -468,7 +466,6 @@ public class CallResolver {
 
                 debugInfo.set(ResolutionDebugInfo.RESULT, resultsForFirstNonemptyCandidateSet.getResultingCall());
             }
-            resolveFunctionArguments(context, resultsForFirstNonemptyCandidateSet);
         }
         else {
             context.trace.report(UNRESOLVED_REFERENCE.on(reference, reference));
@@ -477,20 +474,7 @@ public class CallResolver {
         return resultsForFirstNonemptyCandidateSet != null ? resultsForFirstNonemptyCandidateSet : OverloadResolutionResultsImpl.<F>nameNotFound();
     }
 
-    private <D extends CallableDescriptor> OverloadResolutionResults<D> resolveFunctionArguments(
-            @NotNull BasicCallResolutionContext context,
-            @NotNull OverloadResolutionResultsImpl<D> results
-    ) {
-        if (results.isSingleResult()) {
-            argumentTypeResolver.checkTypesForFunctionArguments(context, results.getResultingCall().getCallToCompleteTypeArgumentInference());
-        }
-        else {
-            argumentTypeResolver.checkTypesForFunctionArgumentsWithNoCallee(context);
-        }
-        return results;
-    }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @NotNull
     private <D extends CallableDescriptor, F extends D> OverloadResolutionResultsImpl<F> performResolutionGuardedForExtraFunctionLiteralArguments(
