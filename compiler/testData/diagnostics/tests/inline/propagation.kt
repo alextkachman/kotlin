@@ -10,10 +10,10 @@ inline fun inlineFunWithInvokeClosure(s: (p: Int) -> Unit) {
     subNoInline({(p: Int) -> s(p)})
 }
 
-inline fun inlineFunWithInvokeNonInline(noinline s: (p: Int) -> Unit) {
+<!NOTHING_TO_INLINE!>inline fun inlineFunWithInvokeNonInline(noinline s: (p: Int) -> Unit) {
     subInline(s)
     subNoInline(s)
-}
+}<!>
 
 inline fun Function1<Int, Unit>.inlineExt(s: (p: Int) -> Unit) {
     subInline(this)

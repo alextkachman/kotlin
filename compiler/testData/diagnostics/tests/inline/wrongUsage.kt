@@ -18,9 +18,8 @@ inline fun inlineFunWrongUsageInClosure(s: (p: Int) -> Unit) {
     }()
 }
 
-inline fun inlineFunNoInline(noinline s: (p: Int) -> Unit) {
+<!NOTHING_TO_INLINE!>inline fun inlineFunNoInline(noinline s: (p: Int) -> Unit) {
     s
     if (true) s else 0
     val c = s
-}
-
+}<!>

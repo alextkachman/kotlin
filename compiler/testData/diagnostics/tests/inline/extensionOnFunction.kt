@@ -23,6 +23,6 @@ inline fun inlineFunWrongExtension(s: (p: Int) -> Unit) {
     <!USAGE_IS_NOT_INLINABLE!>s<!>.noInlineExt(11)
 }
 
-inline fun inlineFunNoInline(noinline s: (p: Int) -> Unit) {
+<!NOTHING_TO_INLINE!>inline fun inlineFunNoInline(noinline s: (p: Int) -> Unit) {
     s.noInlineExt(11)
-}
+}<!>

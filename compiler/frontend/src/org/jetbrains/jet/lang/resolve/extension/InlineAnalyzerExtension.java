@@ -22,6 +22,7 @@ import org.jetbrains.jet.lang.diagnostics.Errors;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.BindingTrace;
 import org.jetbrains.jet.lang.resolve.FunctionAnalyzerExtension;
+import org.jetbrains.jet.lang.types.lang.KotlinBuiltIns;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class InlineAnalyzerExtension implements FunctionAnalyzerExtension.Analyz
 
         checkDefaults(descriptor, function, trace);
         checkModality(descriptor, function, trace);
+        checkHashInlinable(descriptor, function, trace);
 
         JetVisitorVoid visitor = new JetVisitorVoid() {
 
@@ -91,5 +93,30 @@ public class InlineAnalyzerExtension implements FunctionAnalyzerExtension.Analyz
         }
 
         trace.report(Errors.WRONG_MEMBER_MODALITY_FOR_INLINE.on(function));
+    }
+
+    private void checkHashInlinable(
+            @NotNull SimpleFunctionDescriptor functionDescriptor,
+            @NotNull JetFunction function,
+            @NotNull BindingTrace trace
+    ) {
+        List<ValueParameterDescriptor> parameters = functionDescriptor.getValueParameters();
+        for (ValueParameterDescriptor parameter : parameters) {
+            KotlinBuiltIns builtIns = KotlinBuiltIns.getInstance();
+            if (builtIns.isExactFunctionOrExtensionFunctionType(parameter.getType())) {
+                if (!builtIns.hasNoinlineAnnotation(parameter)) {
+                    return;
+                }
+            }
+        }
+        ReceiverParameterDescriptor receiverParameter = functionDescriptor.getReceiverParameter();
+        if (receiverParameter != null) {
+            if (KotlinBuiltIns.getInstance().isExactFunctionOrExtensionFunctionType(receiverParameter.getType())) {
+                //or extension on inlinable function
+                return;
+            }
+        }
+
+        trace.report(Errors.NOTHING_TO_INLINE.on(function, functionDescriptor));
     }
 }

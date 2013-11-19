@@ -6,11 +6,11 @@ inline fun inlineFunWithInvoke(s: (p: Int) -> Unit) {
     s invoke 11
 }
 
-inline fun inlineFunWithInvokeNonInline(noinline s: (p: Int) -> Unit) {
+<!NOTHING_TO_INLINE!>inline fun inlineFunWithInvokeNonInline(noinline s: (p: Int) -> Unit) {
     s(11)
     s.invoke(11)
     s invoke 11
-}
+}<!>
 
 inline fun Function1<Int, Unit>.inlineExt() {
     invoke(11)
