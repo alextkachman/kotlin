@@ -70,14 +70,14 @@ public class JetControlFlowProcessor {
             JetDeclarationWithBody declarationWithBody = (JetDeclarationWithBody) subroutine;
             List<JetParameter> valueParameters = declarationWithBody.getValueParameters();
             for (JetParameter valueParameter : valueParameters) {
-                valueParameter.accept(cfpVisitor);
+                cfpVisitor.generateInstructions(valueParameter);
             }
             JetExpression bodyExpression = declarationWithBody.getBodyExpression();
             if (bodyExpression != null) {
-                bodyExpression.accept(cfpVisitor);
+                cfpVisitor.generateInstructions(bodyExpression);
             }
         } else {
-            subroutine.accept(cfpVisitor);
+            cfpVisitor.generateInstructions(subroutine);
         }
         return builder.exitSubroutine(subroutine);
     }
@@ -116,16 +116,13 @@ public class JetControlFlowProcessor {
                 throw new UnsupportedOperationException("[JetControlFlowProcessor] " + element.toString());
             }
         };
-        private final JetVisitorVoid patternVisitor = new JetVisitorVoid() {
-
-            @Override
-            public void visitJetElement(JetElement element) {
-                throw new UnsupportedOperationException("[JetControlFlowProcessor] " + element.toString());
-            }
-        };
 
         private CFPVisitor(boolean inCondition) {
             this.inCondition = inCondition;
+        }
+
+        public void generateInstructions(@Nullable JetElement element) {
+            generateInstructions(element, inCondition);
         }
 
         private void generateInstructions(@Nullable JetElement element, boolean inCondition) {
@@ -138,6 +135,22 @@ public class JetControlFlowProcessor {
                 visitor = new CFPVisitor(inCondition);
             }
             element.accept(visitor);
+            checkNothingType(element);
+        }
+
+        private void checkNothingType(JetElement element) {
+            if (!(element instanceof JetExpression)) return;
+            JetExpression expression = JetPsiUtil.deparenthesize((JetExpression) element);
+            if (expression instanceof JetStatementExpression || expression instanceof  JetTryExpression
+                || expression instanceof JetThrowExpression || expression instanceof JetFinallySection
+                    || expression instanceof JetIfExpression || expression instanceof JetWhenExpression) return;
+            //noinspection ConstantConditions
+            if (!trace.get(BindingContext.PROCESSED, expression)) return;
+
+            JetType type = trace.getBindingContext().get(BindingContext.EXPRESSION_TYPE, expression);
+            if (type != null && KotlinBuiltIns.getInstance().isNothing(type)) {
+                builder.jumpToError();
+            }
         }
 
         @Override
@@ -173,12 +186,6 @@ public class JetControlFlowProcessor {
         @Override
         public void visitSimpleNameExpression(JetSimpleNameExpression expression) {
             builder.read(expression);
-            if (trace.get(BindingContext.PROCESSED, expression)) {
-                JetType type = trace.getBindingContext().get(BindingContext.EXPRESSION_TYPE, expression);
-                if (type != null && KotlinBuiltIns.getInstance().isNothing(type)) {
-                    builder.jumpToError();
-                }
-            }
         }
 
         @Override
@@ -663,12 +670,6 @@ public class JetControlFlowProcessor {
                 generateInstructions(selectorExpression, false);
             }
             builder.read(expression);
-            if (trace.get(BindingContext.PROCESSED, expression)) {
-                JetType type = trace.getBindingContext().get(BindingContext.EXPRESSION_TYPE, expression);
-                if (type != null && KotlinBuiltIns.getInstance().isNothing(type)) {
-                    builder.jumpToError();
-                }
-            }
         }
 
         private void visitCall(JetCallElement call) {
@@ -694,12 +695,6 @@ public class JetControlFlowProcessor {
 
             generateInstructions(expression.getCalleeExpression(), false);
             builder.read(expression);
-            if (trace.get(BindingContext.PROCESSED, expression)) {
-                JetType type = trace.getBindingContext().get(BindingContext.EXPRESSION_TYPE, expression);
-                if (type != null && KotlinBuiltIns.getInstance().isNothing(type)) {
-                    builder.jumpToError();
-                }
-            }
         }
 
         @Override
