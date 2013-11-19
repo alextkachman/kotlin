@@ -157,7 +157,7 @@ public class ConstantExpressionEvaluator private (val trace: BindingTrace) : Jet
 
         val argumentsEntrySet = resolvedCall.getValueArguments().entrySet()
         if (argumentsEntrySet.isEmpty()) {
-            val function = unaryOperations[UnaryOperation(argumentForReceiver.ctcType, resultingDescriptorName)]
+            val function = unaryOperations[UnaryOperationKey(argumentForReceiver.ctcType, resultingDescriptorName)]
             if (function == null) return null
             return function(argumentForReceiver.value)
         }
@@ -167,7 +167,7 @@ public class ConstantExpressionEvaluator private (val trace: BindingTrace) : Jet
             val argumentForParameter = createOperationArgumentForFristParameter(argument, parameter)
             if (argumentForParameter == null) return null
 
-            val function = binaryOperations[BinaryOperation(argumentForReceiver.ctcType, argumentForParameter.ctcType, resultingDescriptorName)]
+            val function = binaryOperations[BinaryOperationKey(argumentForReceiver.ctcType, argumentForParameter.ctcType, resultingDescriptorName)]
             if (function == null) return null
             return function(argumentForReceiver.value, argumentForParameter.value)
         }
@@ -440,14 +440,14 @@ private fun <A, B> bOp(
         b: CompileTimeType<B>,
         functionName: String,
         f: (A, B) -> Any
-) = BinaryOperation(a, b, functionName) to f as Function2<Any?, Any?, Any>
+) = BinaryOperationKey(a, b, functionName) to f as Function2<Any?, Any?, Any>
 
 [suppress("UNCHECKED_CAST")]
 private fun <A> uOp(
         a: CompileTimeType<A>,
         functionName: String,
         f: (A) -> Any
-) = UnaryOperation(a, functionName) to f  as Function1<Any?, Any>
+) = UnaryOperationKey(a, functionName) to f  as Function1<Any?, Any>
 
-private data class BinaryOperation<A, B>(val f: CompileTimeType<out A>, val s: CompileTimeType<out B>, val functionName: String)
-private data class UnaryOperation<A>(val f: CompileTimeType<out A>, val functionName: String)
+private data class BinaryOperationKey<A, B>(val f: CompileTimeType<out A>, val s: CompileTimeType<out B>, val functionName: String)
+private data class UnaryOperationKey<A>(val f: CompileTimeType<out A>, val functionName: String)
