@@ -23,7 +23,7 @@ import org.jetbrains.jet.JetNodeTypes;
 
 import java.util.List;
 
-public class JetTryExpression extends JetExpressionImpl {
+public class JetTryExpression extends JetExpressionImpl implements JetStatementExpression {
     public JetTryExpression(@NotNull ASTNode node) {
         super(node);
     }
