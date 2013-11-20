@@ -19,6 +19,7 @@ package org.jetbrains.jet.testing;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiPackage;
 import junit.framework.Assert;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.asJava.KotlinLightClass;
@@ -35,6 +36,10 @@ public final class ReferenceUtils {
             String elementText = renderer.getElementText(jetLightClass);
             String containerText = JetLightClassListCellRenderer.getContainerTextStatic(jetLightClass);
             return (containerText != null) ? containerText + "." + elementText : elementText;
+        }
+
+        if (element instanceof PsiPackage) {
+            return ((PsiPackage) element).getName(); // TODO hack
         }
 
         Assert.assertTrue(element instanceof NavigationItem);
