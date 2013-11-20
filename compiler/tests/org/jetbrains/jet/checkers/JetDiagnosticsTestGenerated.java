@@ -3792,6 +3792,11 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
                 doTest("compiler/testData/diagnostics/tests/inline/wrongUsage.kt");
             }
             
+            @TestMetadata("wrongUsage2.kt")
+            public void testWrongUsage2() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/wrongUsage2.kt");
+            }
+            
             @TestMetadata("compiler/testData/diagnostics/tests/inline/nonPublicMember")
             public static class NonPublicMember extends AbstractDiagnosticsTestWithEagerResolve {
                 public void testAllFilesPresentInNonPublicMember() throws Exception {
