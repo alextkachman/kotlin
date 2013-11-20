@@ -20,7 +20,7 @@ public fun <T: Throwable> failsWith(exceptionClass: Class<T>, block: ()-> Any): 
  * Comments out a block of test code until it is implemented while keeping a link to the code
  * to implement in your unit test output
  */
-public inline fun todo(block: ()-> Any) {
+public fun todo(block: ()-> Any) {
     println("TODO at " + (Exception() as java.lang.Throwable).getStackTrace()?.get(1) + " for " + block)
 }
 
