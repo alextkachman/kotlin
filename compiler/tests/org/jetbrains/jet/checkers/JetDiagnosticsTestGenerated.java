@@ -3742,6 +3742,11 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
                 doTest("compiler/testData/diagnostics/tests/inline/capture.kt");
             }
             
+            @TestMetadata("constructor.kt")
+            public void testConstructor() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/constructor.kt");
+            }
+            
             @TestMetadata("extensionOnFunction.kt")
             public void testExtensionOnFunction() throws Exception {
                 doTest("compiler/testData/diagnostics/tests/inline/extensionOnFunction.kt");
