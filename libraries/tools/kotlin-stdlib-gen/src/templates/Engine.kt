@@ -18,7 +18,7 @@ enum class Family {
 class GenericFunction(val signature : String): Comparable<GenericFunction> {
     var doc : String = ""
     var toNullableT : Boolean = false
-    val isInline : Boolean = true;
+    var isInline : Boolean = true;
     val blockedFor = HashSet<Family>()
     val bodies = HashMap<Family, String>()
     val returnTypes = HashMap<Family, String>()
