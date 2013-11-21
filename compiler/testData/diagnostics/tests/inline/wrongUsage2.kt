@@ -11,5 +11,5 @@ public fun <T> callable(action: ()-> T) {
 }
 
 public inline fun <T> String.submit(action: ()->T) {
-    callable(action)
+    callable(<!USAGE_IS_NOT_INLINABLE!>action<!>)
 }
