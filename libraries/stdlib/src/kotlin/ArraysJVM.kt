@@ -6,24 +6,24 @@ import java.util.Arrays
 import jet.runtime.Intrinsic
 
 // Array "constructor"
-[Intrinsic("kotlin.arrays.array")] public inline fun <reified T> array(vararg t : T) : Array<T> = t
+[Intrinsic("kotlin.arrays.array")] public fun <reified T> array(vararg t : T) : Array<T> = t
 
 // "constructors" for primitive types array
-[Intrinsic("kotlin.arrays.array")] public inline fun doubleArray(vararg content : Double) : DoubleArray    = content
+[Intrinsic("kotlin.arrays.array")] public fun doubleArray(vararg content : Double) : DoubleArray    = content
 
-[Intrinsic("kotlin.arrays.array")] public inline fun floatArray(vararg content : Float) : FloatArray       = content
+[Intrinsic("kotlin.arrays.array")] public fun floatArray(vararg content : Float) : FloatArray       = content
 
-[Intrinsic("kotlin.arrays.array")] public inline fun longArray(vararg content : Long) : LongArray          = content
+[Intrinsic("kotlin.arrays.array")] public fun longArray(vararg content : Long) : LongArray          = content
 
-[Intrinsic("kotlin.arrays.array")] public inline fun intArray(vararg content : Int) : IntArray             = content
+[Intrinsic("kotlin.arrays.array")] public fun intArray(vararg content : Int) : IntArray             = content
 
-[Intrinsic("kotlin.arrays.array")] public inline fun charArray(vararg content : Char) : CharArray          = content
+[Intrinsic("kotlin.arrays.array")] public fun charArray(vararg content : Char) : CharArray          = content
 
-[Intrinsic("kotlin.arrays.array")] public inline fun shortArray(vararg content : Short) : ShortArray       = content
+[Intrinsic("kotlin.arrays.array")] public fun shortArray(vararg content : Short) : ShortArray       = content
 
-[Intrinsic("kotlin.arrays.array")] public inline fun byteArray(vararg content : Byte) : ByteArray          = content
+[Intrinsic("kotlin.arrays.array")] public fun byteArray(vararg content : Byte) : ByteArray          = content
 
-[Intrinsic("kotlin.arrays.array")] public inline fun booleanArray(vararg content : Boolean) : BooleanArray = content
+[Intrinsic("kotlin.arrays.array")] public fun booleanArray(vararg content : Boolean) : BooleanArray = content
 
 public fun   ByteArray.binarySearch(key: Byte) : Int   = Arrays.binarySearch(this, key)
 public fun  ShortArray.binarySearch(key: Short) : Int  = Arrays.binarySearch(this, key)
