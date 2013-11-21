@@ -138,7 +138,9 @@ public class ArgumentTypeResolver {
     }
 
     private void checkArgumentType(CallResolutionContext<?> context, JetExpression argumentExpression) {
-        expressionTypingServices.getType(context.scope, argumentExpression, NO_EXPECTED_TYPE, context.dataFlowInfo, context.trace);
+        CallResolutionContext<?> newContext =
+                context.replaceExpectedType(NO_EXPECTED_TYPE).replaceExpressionPosition(ExpressionPosition.FREE);
+        expressionTypingServices.getTypeInfo(argumentExpression, newContext);
         updateResultArgumentTypeIfNotDenotable(context, argumentExpression);
     }
 
@@ -159,7 +161,9 @@ public class ArgumentTypeResolver {
             for (ValueArgument argument : valueArguments) {
                 JetExpression expression = argument.getArgumentExpression();
                 if (expression instanceof JetFunctionLiteralExpression) {
-                    expressionTypingServices.getType(context.scope, expression, functionType, context.dataFlowInfo, context.trace);
+                    CallResolutionContext<?> newContext =
+                            context.replaceExpectedType(functionType).replaceExpressionPosition(ExpressionPosition.FREE);
+                    expressionTypingServices.getTypeInfo(expression, newContext);
                 }
             }
         }
