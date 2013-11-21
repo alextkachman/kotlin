@@ -39,14 +39,14 @@ public class AccessorForFunctionDescriptor extends SimpleFunctionDescriptorImpl 
               Name.identifier((descriptor instanceof ConstructorDescriptor ? "$init" : descriptor.getName()) + "$b$" + index),
               Kind.DECLARATION);
 
+
         initialize(DescriptorUtils.getReceiverParameterType(descriptor.getReceiverParameter()),
                    descriptor instanceof ConstructorDescriptor ? NO_RECEIVER_PARAMETER : descriptor.getExpectedThisObject(),
                    Collections.<TypeParameterDescriptor>emptyList(),
                    copyValueParameters(descriptor),
                    descriptor.getReturnType(),
                    Modality.FINAL,
-                   Visibilities.INTERNAL,
-                   /*isInline = */ false);
+                   Visibilities.INTERNAL);
     }
 
     @NotNull
