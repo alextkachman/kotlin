@@ -20,15 +20,12 @@ import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.descriptors.CallableDescriptor;
-import org.jetbrains.jet.lang.descriptors.ValueParameterDescriptor;
 import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
 import org.jetbrains.jet.lang.diagnostics.Errors;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.*;
 import org.jetbrains.jet.lang.resolve.calls.context.*;
 import org.jetbrains.jet.lang.resolve.calls.model.MutableDataFlowInfoForArguments;
-import org.jetbrains.jet.lang.resolve.calls.model.ResolvedCallImpl;
-import org.jetbrains.jet.lang.resolve.calls.model.ResolvedValueArgument;
 import org.jetbrains.jet.lang.resolve.constants.CompileTimeConstant;
 import org.jetbrains.jet.lang.resolve.constants.CompileTimeConstantResolver;
 import org.jetbrains.jet.lang.resolve.constants.ErrorValue;
@@ -44,7 +41,6 @@ import org.jetbrains.jet.lang.types.lang.KotlinBuiltIns;
 import javax.inject.Inject;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.jetbrains.jet.lang.resolve.BindingContextUtils.getRecordedTypeInfo;
@@ -94,7 +90,7 @@ public class ArgumentTypeResolver {
         for (ValueArgument valueArgument : context.call.getValueArguments()) {
             JetExpression argumentExpression = valueArgument.getArgumentExpression();
             if (argumentExpression != null && !(argumentExpression instanceof JetFunctionLiteralExpression)) {
-                checkArgumentType(context, argumentExpression);
+                checkArgumentTypeWithNoCallee(context, argumentExpression);
             }
         }
 
@@ -119,12 +115,12 @@ public class ArgumentTypeResolver {
         for (ValueArgument valueArgument : context.call.getValueArguments()) {
             JetExpression argumentExpression = valueArgument.getArgumentExpression();
             if (argumentExpression != null && (argumentExpression instanceof JetFunctionLiteralExpression)) {
-                checkArgumentType(context, argumentExpression);
+                checkArgumentTypeWithNoCallee(context, argumentExpression);
             }
         }
 
         for (JetExpression expression : context.call.getFunctionLiteralArguments()) {
-            checkArgumentType(context, expression);
+            checkArgumentTypeWithNoCallee(context, expression);
         }
     }
 
@@ -132,13 +128,14 @@ public class ArgumentTypeResolver {
         for (ValueArgument valueArgument : unmappedArguments) {
             JetExpression argumentExpression = valueArgument.getArgumentExpression();
             if (argumentExpression != null) {
-                checkArgumentType(context, argumentExpression);
+                checkArgumentTypeWithNoCallee(context, argumentExpression);
             }
         }
     }
 
-    private void checkArgumentType(CallResolutionContext<?> context, JetExpression argumentExpression) {
-        expressionTypingServices.getType(context.scope, argumentExpression, NO_EXPECTED_TYPE, context.dataFlowInfo, context.trace);
+    private void checkArgumentTypeWithNoCallee(CallResolutionContext<?> context, JetExpression argumentExpression) {
+        expressionTypingServices.getTypeInfo(
+                argumentExpression, context.replaceExpectedType(NO_EXPECTED_TYPE).replaceExpressionPosition(ExpressionPosition.FREE));
         updateResultArgumentTypeIfNotDenotable(context, argumentExpression);
     }
 
