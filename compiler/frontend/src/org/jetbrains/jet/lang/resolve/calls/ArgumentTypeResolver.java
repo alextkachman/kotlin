@@ -20,15 +20,14 @@ import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.descriptors.CallableDescriptor;
-import org.jetbrains.jet.lang.descriptors.ValueParameterDescriptor;
 import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
 import org.jetbrains.jet.lang.diagnostics.Errors;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.*;
-import org.jetbrains.jet.lang.resolve.calls.context.*;
+import org.jetbrains.jet.lang.resolve.calls.context.CallResolutionContext;
+import org.jetbrains.jet.lang.resolve.calls.context.CheckValueArgumentsMode;
+import org.jetbrains.jet.lang.resolve.calls.context.ResolutionContext;
 import org.jetbrains.jet.lang.resolve.calls.model.MutableDataFlowInfoForArguments;
-import org.jetbrains.jet.lang.resolve.calls.model.ResolvedCallImpl;
-import org.jetbrains.jet.lang.resolve.calls.model.ResolvedValueArgument;
 import org.jetbrains.jet.lang.resolve.constants.CompileTimeConstant;
 import org.jetbrains.jet.lang.resolve.constants.CompileTimeConstantResolver;
 import org.jetbrains.jet.lang.resolve.constants.ErrorValue;
@@ -44,13 +43,13 @@ import org.jetbrains.jet.lang.types.lang.KotlinBuiltIns;
 import javax.inject.Inject;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.jetbrains.jet.lang.resolve.BindingContextUtils.getRecordedTypeInfo;
 import static org.jetbrains.jet.lang.resolve.calls.CallResolverUtil.ResolveArgumentsMode;
 import static org.jetbrains.jet.lang.resolve.calls.CallResolverUtil.ResolveArgumentsMode.RESOLVE_FUNCTION_ARGUMENTS;
 import static org.jetbrains.jet.lang.resolve.calls.CallResolverUtil.ResolveArgumentsMode.SHAPE_FUNCTION_ARGUMENTS;
+import static org.jetbrains.jet.lang.resolve.calls.context.ContextDependency.DEPENDENT;
 import static org.jetbrains.jet.lang.types.TypeUtils.*;
 
 public class ArgumentTypeResolver {
@@ -94,7 +93,7 @@ public class ArgumentTypeResolver {
         for (ValueArgument valueArgument : context.call.getValueArguments()) {
             JetExpression argumentExpression = valueArgument.getArgumentExpression();
             if (argumentExpression != null && !(argumentExpression instanceof JetFunctionLiteralExpression)) {
-                checkArgumentType(context, argumentExpression);
+                checkArgumentTypeWithNoCallee(context, argumentExpression);
             }
         }
 
@@ -119,12 +118,12 @@ public class ArgumentTypeResolver {
         for (ValueArgument valueArgument : context.call.getValueArguments()) {
             JetExpression argumentExpression = valueArgument.getArgumentExpression();
             if (argumentExpression != null && (argumentExpression instanceof JetFunctionLiteralExpression)) {
-                checkArgumentType(context, argumentExpression);
+                checkArgumentTypeWithNoCallee(context, argumentExpression);
             }
         }
 
         for (JetExpression expression : context.call.getFunctionLiteralArguments()) {
-            checkArgumentType(context, expression);
+            checkArgumentTypeWithNoCallee(context, expression);
         }
     }
 
@@ -132,37 +131,14 @@ public class ArgumentTypeResolver {
         for (ValueArgument valueArgument : unmappedArguments) {
             JetExpression argumentExpression = valueArgument.getArgumentExpression();
             if (argumentExpression != null) {
-                checkArgumentType(context, argumentExpression);
+                checkArgumentTypeWithNoCallee(context, argumentExpression);
             }
         }
     }
 
-    private void checkArgumentType(CallResolutionContext<?> context, JetExpression argumentExpression) {
-        expressionTypingServices.getType(context.scope, argumentExpression, NO_EXPECTED_TYPE, context.dataFlowInfo, context.trace);
+    private void checkArgumentTypeWithNoCallee(CallResolutionContext<?> context, JetExpression argumentExpression) {
+        expressionTypingServices.getTypeInfo(argumentExpression, context.replaceExpectedType(NO_EXPECTED_TYPE));
         updateResultArgumentTypeIfNotDenotable(context, argumentExpression);
-    }
-
-    public <D extends CallableDescriptor> void checkTypesForFunctionArguments(CallResolutionContext<?> context, ResolvedCallImpl<D> resolvedCall) {
-        Map<ValueParameterDescriptor, ResolvedValueArgument> arguments = resolvedCall.getValueArguments();
-        for (Map.Entry<ValueParameterDescriptor, ResolvedValueArgument> entry : arguments.entrySet()) {
-            ValueParameterDescriptor valueParameterDescriptor = entry.getKey();
-            JetType varargElementType = valueParameterDescriptor.getVarargElementType();
-            JetType functionType;
-            if (varargElementType != null) {
-                functionType = varargElementType;
-            }
-            else {
-                functionType = valueParameterDescriptor.getType();
-            }
-            ResolvedValueArgument valueArgument = entry.getValue();
-            List<ValueArgument> valueArguments = valueArgument.getArguments();
-            for (ValueArgument argument : valueArguments) {
-                JetExpression expression = argument.getArgumentExpression();
-                if (expression instanceof JetFunctionLiteralExpression) {
-                    expressionTypingServices.getType(context.scope, expression, functionType, context.dataFlowInfo, context.trace);
-                }
-            }
-        }
     }
 
     public static boolean isFunctionLiteralArgument(@NotNull JetExpression expression) {
@@ -211,8 +187,7 @@ public class ArgumentTypeResolver {
         if (recordedTypeInfo != null) {
             return recordedTypeInfo;
         }
-        ResolutionContext newContext = context.replaceExpectedType(TypeUtils.NO_EXPECTED_TYPE)
-                .replaceContextDependency(ContextDependency.DEPENDENT).replaceExpressionPosition(ExpressionPosition.FREE);
+        ResolutionContext newContext = context.replaceExpectedType(NO_EXPECTED_TYPE).replaceContextDependency(DEPENDENT);
 
         return expressionTypingServices.getTypeInfo(expression, newContext);
     }

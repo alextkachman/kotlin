@@ -32,7 +32,6 @@ import org.jetbrains.jet.lang.descriptors.impl.ClassDescriptorBase;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.AnnotationResolver;
 import org.jetbrains.jet.lang.resolve.BindingContext;
-import org.jetbrains.jet.lang.resolve.DescriptorFactory;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.lazy.ForceResolveUtil;
 import org.jetbrains.jet.lang.resolve.lazy.LazyDescriptor;
@@ -77,12 +76,10 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
     private final ClassKind kind;
     private final boolean isInner;
 
-    private final NotNullLazyValue<ReceiverParameterDescriptor> thisAsReceiverParameter;
     private final NotNullLazyValue<List<AnnotationDescriptor>> annotations;
     private final NullableLazyValue<ClassDescriptor> classObjectDescriptor;
 
     private final LazyClassMemberScope unsubstitutedMemberScope;
-    private final JetScope unsubstitutedInnerClassesScope;
 
     private final NotNullLazyValue<JetScope> scopeForClassHeaderResolution;
     private final NotNullLazyValue<JetScope> scopeForMemberDeclarationResolution;
@@ -94,7 +91,7 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
             @NotNull Name name,
             @NotNull JetClassLikeInfo classLikeInfo
     ) {
-        super(containingDeclaration, name);
+        super(resolveSession.getStorageManager(), containingDeclaration, name);
         this.resolveSession = resolveSession;
 
         if (classLikeInfo.getCorrespondingClassOrObject() != null) {
@@ -108,14 +105,13 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
                 resolveSession.getDeclarationProviderFactory().getClassMemberDeclarationProvider(classLikeInfoForMembers);
 
         this.unsubstitutedMemberScope = new LazyClassMemberScope(resolveSession, declarationProvider, this);
-        this.unsubstitutedInnerClassesScope = new InnerClassesScopeWrapper(unsubstitutedMemberScope);
 
         this.typeConstructor = new LazyClassTypeConstructor();
 
         this.kind = classLikeInfo.getClassKind();
 
         JetModifierList modifierList = classLikeInfo.getModifierList();
-        if (kind.isObject()) {
+        if (kind.isSingleton()) {
             this.modality = Modality.FINAL;
         }
         else {
@@ -128,12 +124,6 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
         this.isInner = isInnerClass(modifierList);
 
         StorageManager storageManager = resolveSession.getStorageManager();
-        this.thisAsReceiverParameter = storageManager.createLazyValue(new Function0<ReceiverParameterDescriptor>() {
-            @Override
-            public ReceiverParameterDescriptor invoke() {
-                return DescriptorFactory.createLazyReceiverParameterDescriptor(LazyClassDescriptor.this);
-            }
-        });
         this.annotations = storageManager.createLazyValue(new Function0<List<AnnotationDescriptor>>() {
             @Override
             public List<AnnotationDescriptor> invoke() {
@@ -170,12 +160,6 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
     @Override
     protected JetScope getScopeForMemberLookup() {
         return unsubstitutedMemberScope;
-    }
-
-    @NotNull
-    @Override
-    public JetScope getUnsubstitutedInnerClassesScope() {
-        return unsubstitutedInnerClassesScope;
     }
 
     @NotNull
@@ -261,12 +245,6 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
     }
 
     @Override
-    public JetType getClassObjectType() {
-        ClassDescriptor classObjectDescriptor = getClassObjectDescriptor();
-        return classObjectDescriptor == null ? null : classObjectDescriptor.getDefaultType();
-    }
-
-    @Override
     public ClassDescriptor getClassObjectDescriptor() {
         return classObjectDescriptor.invoke();
     }
@@ -323,12 +301,6 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
     @Override
     public boolean isInner() {
         return isInner;
-    }
-
-    @NotNull
-    @Override
-    public ReceiverParameterDescriptor getThisAsReceiverParameter() {
-        return thisAsReceiverParameter.invoke();
     }
 
     @NotNull
