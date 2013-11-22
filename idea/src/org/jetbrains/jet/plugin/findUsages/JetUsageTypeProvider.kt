@@ -179,7 +179,7 @@ public object JetUsageTypeProvider : UsageTypeProviderEx {
         val descriptor = bindingContext.get(BindingContext.REFERENCE_TARGET, reference)
 
         return when (descriptor) {
-            is ClassifierDescriptor, is JavaPackageFragmentDescriptor -> getClassUsageType()
+            is ClassifierDescriptor, is PackageViewDescriptor -> getClassUsageType() // TODO ??
             is VariableDescriptor -> getVariableUsageType()
             is FunctionDescriptor -> getFunctionUsageType(descriptor)
             else -> null
